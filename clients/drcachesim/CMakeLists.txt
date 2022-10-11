@@ -107,9 +107,9 @@ else ()
   set(snappy_reader "")
 endif()
 
-if (liblz4)
-  add_definitions(-DHAS_LZ4)
-endif ()
+#if (liblz4)
+#  add_definitions(-DHAS_LZ4)
+#endif ()
 
 set(client_and_sim_srcs
   common/named_pipe_${os_name}.cpp

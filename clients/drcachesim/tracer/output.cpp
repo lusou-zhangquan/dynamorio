@@ -184,7 +184,7 @@ get_file_type()
 #ifdef HAS_LZ4
 static const LZ4F_preferences_t lz4_ops = {
     { LZ4F_max256KB, LZ4F_blockLinked, LZ4F_noContentChecksum, LZ4F_frame,
-      /*unknown contentSize=*/0, /*dictID=*/0, LZ4F_noBlockChecksum },
+      /*unknown contentSize=*/0, /*dictID=*/0, 0 },
     // We may want to expose this knob as a parameter.  The fastest for my
     // SSD is -4096, but on another machine 0 is fastest; plus, we may want
     // to raise it to 3 for cases with higher i/o overhead, where it is
