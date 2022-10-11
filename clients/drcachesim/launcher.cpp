@@ -49,6 +49,7 @@
 #endif
 
 #include <assert.h>
+#include <chrono>
 #include <stdio.h>
 #include <iostream>
 #include "analyzer_multi.h"
@@ -79,6 +80,7 @@
 static analyzer_t *analyzer;
 #ifdef UNIX
 static pid_t child;
+static bool should_record = false;
 #endif
 
 #ifdef UNIX
@@ -96,6 +98,16 @@ signal_handler(int sig, siginfo_t *info, void *cxt)
     if (analyzer != NULL)
         delete analyzer;
     exit(1);
+}
+
+static void
+start_record_signal_handler(int sig, siginfo_t *info, void *cxt)
+{
+#    define CATCH_USER_SIG "Catch child process user define signal.\n"
+    ssize_t res = write(STDERR_FILENO, CATCH_USER_SIG, sizeof(CATCH_USER_SIG));
+    (void)res; // Work around compiler warnings.
+    should_record = true;
+    return;
 }
 #endif
 
@@ -216,6 +228,17 @@ _tmain(int argc, const TCHAR *targv[])
     int rc = sigaction(SIGINT, &act, NULL);
     if (rc != 0)
         NOTIFY(0, "WARNING", "Failed to set up interrupt handler\n");
+
+    struct sigaction user_act;
+    user_act.sa_sigaction = start_record_signal_handler;
+    sigfillset(&act.sa_mask); // Block all within handler.
+    user_act.sa_flags = SA_SIGINFO;
+    rc = sigaction(SIGUSR1, &user_act, NULL);
+    if (rc != 0) {
+        NOTIFY(0, "WARNING", "Failed to set up user defined signal handler\n");
+    } else {
+        NOTIFY(0, "WARNING", "Successfully set up user defined signal handler\n");
+    }
 #else
     // We do not bother with SetConsoleCtrlHandler for two reasons:
     // one, there's no problem to solve like the UNIX fifo file left
@@ -354,11 +377,15 @@ _tmain(int argc, const TCHAR *targv[])
     }
 
     if (!op_offline.get_value() || have_trace_file) {
-        if (!analyzer->run()) {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        if (!analyzer->run(should_record)) {
             std::string error_string_ = analyzer->get_error_string();
             FATAL_ERROR("failed to run analyzer%s%s", error_string_.empty() ? "" : ": ",
                         error_string_.c_str());
         }
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        int64_t elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+        NOTIFY(0, "INFO", "Record time = %ld \n", elapsed_time / 1000);
     }
 
     if (!have_trace_file) {

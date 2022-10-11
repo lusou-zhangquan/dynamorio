@@ -306,13 +306,16 @@ analyzer_t::process_tasks(std::vector<analyzer_shard_data_t *> *tasks)
 }
 
 bool
-analyzer_t::run()
+analyzer_t::run(bool &should_record)
 {
     // XXX i#3286: Add a %-completed progress message by looking at the file sizes.
     if (!parallel_) {
         if (!start_reading())
             return false;
         for (; *serial_trace_iter_ != *trace_end_; ++(*serial_trace_iter_)) {
+            if (!should_record) {
+                continue;
+            }
             for (int i = 0; i < num_tools_; ++i) {
                 memref_t memref = **serial_trace_iter_;
                 // We short-circuit and exit on an error to avoid confusion over
