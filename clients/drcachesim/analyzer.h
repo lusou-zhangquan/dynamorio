@@ -86,13 +86,7 @@ public:
                int worker_count = 0);
     /** Launches the analysis process. */
     virtual bool
-    run() {
-        bool should_record = true;
-        return run(should_record);
-    }
-
-    virtual bool
-    run(bool &should_record);
+    run();
     /** Presents the results of the analysis. */
     virtual bool
     print_stats();
