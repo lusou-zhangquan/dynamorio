@@ -42,6 +42,7 @@
 #include "dr_api.h"
 #include "drmgr.h"
 #include "drx.h"
+#include <unistd.h>
 
 #ifdef WINDOWS
 #    define DISPLAY_STRING(msg) dr_messagebox(msg)
@@ -98,8 +99,10 @@ event_exit(void)
     len = dr_snprintf(msg, sizeof(msg) / sizeof(msg[0]),
                       "Number of basic blocks seen: %d\n"
                       "               Maximum size: %d instructions\n"
-                      "               Average size: %5.1f instructions\n",
-                      num_bb, max_size, ave_size);
+                      "               Average size: %5.1f instructions\n"
+                      "               My pid %d\n"
+                      "               My ppid %d\n",
+                      num_bb, max_size, ave_size, getpid(), getppid());
     DR_ASSERT(len > 0);
     msg[sizeof(msg) / sizeof(msg[0]) - 1] = '\0';
     DISPLAY_STRING(msg);

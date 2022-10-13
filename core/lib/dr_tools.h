@@ -2704,5 +2704,4 @@ DR_API
  */
 bool
 dr_hashtable_remove(void *drcontext, void *htable, ptr_uint_t key);
-
 #endif /* _DR_TOOLS_H_ */

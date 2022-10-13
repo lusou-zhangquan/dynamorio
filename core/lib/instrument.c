@@ -68,6 +68,8 @@
 extern ssize_t
 do_file_write(file_t f, const char *fmt, va_list ap);
 
+bool should_instrum = false;
+
 #ifdef DEBUG
 /* case 10450: give messages to clients */
 /* we can't undef ASSERT b/c of DYNAMO_OPTION */
@@ -1734,9 +1736,11 @@ instrument_basic_block(dcontext_t *dcontext, app_pc tag, instrlist_t *bb, bool f
      * bb_building lock when this is called (see PR 227619).
      */
     /* We or together the return values */
-    call_all_ret(ret, |=, , bb_callbacks,
+    if (should_instrum) {
+        call_all_ret(ret, |=, , bb_callbacks,
                  int (*)(void *, void *, instrlist_t *, bool, bool), (void *)dcontext,
                  (void *)tag, bb, for_trace, translating);
+    }
     if (emitflags != NULL)
         *emitflags = ret;
     DOCHECK(1, { check_ilist_translations(bb); });

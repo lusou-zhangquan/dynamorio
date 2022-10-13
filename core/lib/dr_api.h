@@ -129,6 +129,7 @@ dr_client_main(client_id_t id, int argc, const char *argv[]);
 DR_EXPORT void
 dr_init(client_id_t id);
 
+extern bool should_instrum;
 /* Version checking */
 /* This equals major*100 + minor */
 /* clang-format off */

@@ -1137,6 +1137,25 @@ switch_to_native_tool(const char **app_argv, const char *native_tool, char *tool
 }
 #endif /* DRRUN */
 
+static void
+enable_instrum_signal_handler(int sig, siginfo_t *info, void *cxt)
+{
+    info("Catch child process user defined signal.\n");
+    should_instrum = true;
+    return;
+}
+
+static void
+register_signal_handler()
+{
+    struct sigaction user_act;
+    user_act.sa_sigaction = enable_instrum_signal_handler;
+    sigfillset(&user_act.sa_mask); // Block all within handler.
+    user_act.sa_flags = SA_SIGINFO;
+    sigaction(SIGUSR1, &user_act, NULL);
+    info("Finish register user defined signal.\n");
+}
+
 int
 _tmain(int argc, TCHAR *targv[])
 {
@@ -1907,6 +1926,7 @@ done_with_options:
         else
             NULL_TERMINATE_BUFFER(buf);
     }
+    register_signal_handler();
     /* On Linux, we use exec by default to create the app process.  This matches
      * our drrun shell script and makes scripting easier for the user.
      */

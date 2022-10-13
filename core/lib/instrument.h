@@ -223,5 +223,4 @@ instrument_resurrect_rw(dcontext_t *dcontext, void *perscxt, byte *map);
 bool
 instrument_persist_patch(dcontext_t *dcontext, void *perscxt, byte *bb_start,
                          size_t bb_size);
-
 #endif /* _INSTRUMENT_H_ */
